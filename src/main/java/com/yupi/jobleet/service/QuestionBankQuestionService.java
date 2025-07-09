@@ -3,11 +3,13 @@ package com.yupi.jobleet.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.yupi.jobleet.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
+import com.yupi.jobleet.model.dto.questionbankquestion.QuestionBankQuestionQueryRequest;
 import com.yupi.jobleet.model.entity.QuestionBankQuestion;
+import com.yupi.jobleet.model.entity.User;
 import com.yupi.jobleet.model.vo.QuestionBankQuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 题库题目关系服务
@@ -50,4 +52,13 @@ public interface QuestionBankQuestionService extends IService<QuestionBankQuesti
      * @return
      */
     Page<QuestionBankQuestionVO> getQuestionBankQuestionVOPage(Page<QuestionBankQuestion> questionBankQuestionPage, HttpServletRequest request);
+
+    /**
+     * 批量添加题目到题库
+     *
+     * @param questionIdList
+     * @param questionBankId
+     * @param loginUser
+     */
+    public void batchAddQuestionsToBank(List<Long> questionIdList, Long questionBankId, User loginUser);
 }

@@ -1,4 +1,4 @@
-package com.yupi.jobleet.model.dto.questionBank;
+package com.yupi.jobleet.model.dto.questionbank;
 
 import lombok.Data;
 

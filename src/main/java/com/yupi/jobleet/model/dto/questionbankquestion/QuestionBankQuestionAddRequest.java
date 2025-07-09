@@ -1,4 +1,4 @@
-package com.yupi.jobleet.model.dto.questionBankQuestion;
+package com.yupi.jobleet.model.dto.questionbankquestion;
 
 import lombok.Data;
 
@@ -13,21 +13,15 @@ import java.util.List;
  */
 @Data
 public class QuestionBankQuestionAddRequest implements Serializable {
+    /**
+     * 题库id
+     */
+    private Long questionBankId;
 
     /**
-     * 标题
+     * 题目id
      */
-    private String title;
-
-    /**
-     * 内容
-     */
-    private String content;
-
-    /**
-     * 标签列表
-     */
-    private List<String> tags;
+    private Long questionId;
 
     private static final long serialVersionUID = 1L;
 }

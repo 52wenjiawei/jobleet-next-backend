@@ -3,7 +3,7 @@ package com.yupi.jobleet.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.yupi.jobleet.model.dto.questionBank.QuestionBankQueryRequest;
+import com.yupi.jobleet.model.dto.questionbank.QuestionBankQueryRequest;
 import com.yupi.jobleet.model.entity.QuestionBank;
 import com.yupi.jobleet.model.vo.QuestionBankVO;
 

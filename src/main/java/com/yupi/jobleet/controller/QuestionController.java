@@ -1,5 +1,9 @@
 package com.yupi.jobleet.controller;
 
+import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yupi.jobleet.annotation.AuthCheck;
 import com.yupi.jobleet.common.BaseResponse;
@@ -14,6 +18,7 @@ import com.yupi.jobleet.model.dto.question.QuestionEditRequest;
 import com.yupi.jobleet.model.dto.question.QuestionQueryRequest;
 import com.yupi.jobleet.model.dto.question.QuestionUpdateRequest;
 import com.yupi.jobleet.model.entity.Question;
+import com.yupi.jobleet.model.entity.QuestionBankQuestion;
 import com.yupi.jobleet.model.entity.User;
 import com.yupi.jobleet.model.vo.QuestionVO;
 import com.yupi.jobleet.service.QuestionService;
@@ -24,6 +29,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 题目接口
@@ -42,8 +50,6 @@ public class QuestionController {
     @Resource
     private UserService userService;
 
-    // region 增删改查
-
     /**
      * 创建题目
      *
@@ -52,9 +58,10 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/add")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addQuestion(@RequestBody QuestionAddRequest questionAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(questionAddRequest == null, ErrorCode.PARAMS_ERROR);
-        // todo 在此处将实体类和 DTO 进行转换
+        // 在此处将实体类和 DTO 进行转换
         Question question = new Question();
         BeanUtils.copyProperties(questionAddRequest, question);
         // 数据校验
@@ -78,6 +85,7 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/delete")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -109,7 +117,7 @@ public class QuestionController {
         if (questionUpdateRequest == null || questionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // todo 在此处将实体类和 DTO 进行转换
+        // 在此处将实体类和 DTO 进行转换
         Question question = new Question();
         BeanUtils.copyProperties(questionUpdateRequest, question);
         // 数据校验
@@ -178,6 +186,24 @@ public class QuestionController {
         return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
     }
 
+
+    /**
+     * 根据题库id查询题目列表
+     * @param questionQueryRequest
+     * @return
+     */
+    @PostMapping("/questionBank/list/page")
+    public BaseResponse<Page<QuestionVO>> listQuestionByQuestionBankId(@RequestBody QuestionQueryRequest questionQueryRequest,
+                                                       HttpServletRequest request) {
+        long size = questionQueryRequest.getPageSize();
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        Page<Question> questionPage = questionService.listQuestionByPage(questionQueryRequest);
+        // 获取封装类
+        return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
+    }
+
+
     /**
      * 分页获取当前登录用户创建的题目列表
      *
@@ -200,6 +226,23 @@ public class QuestionController {
         Page<Question> questionPage = questionService.page(new Page<>(current, size),
                 questionService.getQueryWrapper(questionQueryRequest));
         // 获取封装类
+        return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
+    }
+
+    /**
+     * 搜索题目 （从ES中搜索）
+     *
+     * @param questionQueryRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/search/page/vo")
+    public BaseResponse<Page<QuestionVO>> searchQuestionVOByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
+                                                                 HttpServletRequest request) {
+        long size = questionQueryRequest.getPageSize();
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 200, ErrorCode.PARAMS_ERROR);
+        Page<Question> questionPage = questionService.searchFromEs(questionQueryRequest);
         return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
     }
 
@@ -235,5 +278,5 @@ public class QuestionController {
         return ResultUtils.success(true);
     }
 
-    // endregion
+
 }

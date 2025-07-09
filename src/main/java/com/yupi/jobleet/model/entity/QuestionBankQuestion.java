@@ -21,12 +21,12 @@ public class QuestionBankQuestion {
     /**
      * 题库 id
      */
-    private Long questionbankid;
+    private Long questionBankId;
 
     /**
      * 题目 id
      */
-    private Long questionid;
+    private Long questionId;
 
     /**
      * 创建用户 id
@@ -60,29 +60,29 @@ public class QuestionBankQuestion {
     /**
      * 题库 id
      */
-    public Long getQuestionbankid() {
-        return questionbankid;
+    public Long getQuestionBankId() {
+        return questionBankId;
     }
 
     /**
      * 题库 id
      */
-    public void setQuestionbankid(Long questionbankid) {
-        this.questionbankid = questionbankid;
+    public void setQuestionBankId(Long questionBankId) {
+        this.questionBankId = questionBankId;
     }
 
     /**
      * 题目 id
      */
-    public Long getQuestionid() {
-        return questionid;
+    public Long getQuestionId() {
+        return questionId;
     }
 
     /**
      * 题目 id
      */
-    public void setQuestionid(Long questionid) {
-        this.questionid = questionid;
+    public void setQuestionId(Long questionId) {
+        this.questionId = questionId;
     }
 
     /**
@@ -140,8 +140,8 @@ public class QuestionBankQuestion {
         }
         QuestionBankQuestion other = (QuestionBankQuestion) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getQuestionbankid() == null ? other.getQuestionbankid() == null : this.getQuestionbankid().equals(other.getQuestionbankid()))
-            && (this.getQuestionid() == null ? other.getQuestionid() == null : this.getQuestionid().equals(other.getQuestionid()))
+            && (this.getQuestionBankId() == null ? other.getQuestionBankId() == null : this.getQuestionBankId().equals(other.getQuestionBankId()))
+            && (this.getQuestionId() == null ? other.getQuestionId() == null : this.getQuestionId().equals(other.getQuestionId()))
             && (this.getUserid() == null ? other.getUserid() == null : this.getUserid().equals(other.getUserid()))
             && (this.getCreatetime() == null ? other.getCreatetime() == null : this.getCreatetime().equals(other.getCreatetime()))
             && (this.getUpdatetime() == null ? other.getUpdatetime() == null : this.getUpdatetime().equals(other.getUpdatetime()));
@@ -152,8 +152,8 @@ public class QuestionBankQuestion {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
-        result = prime * result + ((getQuestionbankid() == null) ? 0 : getQuestionbankid().hashCode());
-        result = prime * result + ((getQuestionid() == null) ? 0 : getQuestionid().hashCode());
+        result = prime * result + ((getQuestionBankId() == null) ? 0 : getQuestionBankId().hashCode());
+        result = prime * result + ((getQuestionId() == null) ? 0 : getQuestionId().hashCode());
         result = prime * result + ((getUserid() == null) ? 0 : getUserid().hashCode());
         result = prime * result + ((getCreatetime() == null) ? 0 : getCreatetime().hashCode());
         result = prime * result + ((getUpdatetime() == null) ? 0 : getUpdatetime().hashCode());
@@ -167,8 +167,8 @@ public class QuestionBankQuestion {
         sb.append(" [");
         sb.append("Hash = ").append(hashCode());
         sb.append(", id=").append(id);
-        sb.append(", questionbankid=").append(questionbankid);
-        sb.append(", questionid=").append(questionid);
+        sb.append(", questionBankId=").append(questionBankId);
+        sb.append(", questionId=").append(questionId);
         sb.append(", userid=").append(userid);
         sb.append(", createtime=").append(createtime);
         sb.append(", updatetime=").append(updatetime);

@@ -6,8 +6,8 @@
 
     <resultMap id="BaseResultMap" type="generator.domain.QuestionBankQuestion">
             <id property="id" column="id" />
-            <result property="questionbankid" column="questionBankId" />
-            <result property="questionid" column="questionId" />
+            <result property="questionBankId" column="questionBankId" />
+            <result property="questionId" column="questionId" />
             <result property="userid" column="userid" />
             <result property="createtime" column="createTime" />
             <result property="updatetime" column="updateTime" />

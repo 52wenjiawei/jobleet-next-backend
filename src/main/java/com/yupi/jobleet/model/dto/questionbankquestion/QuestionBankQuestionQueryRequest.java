@@ -1,4 +1,4 @@
-package com.yupi.jobleet.model.dto.questionBankQuestion;
+package com.yupi.jobleet.model.dto.questionbankquestion;
 
 import com.yupi.jobleet.common.PageRequest;
 import lombok.Data;
@@ -28,24 +28,14 @@ public class QuestionBankQuestionQueryRequest extends PageRequest implements Ser
     private Long notId;
 
     /**
-     * 搜索词
+     * 题库id
      */
-    private String searchText;
+    private Long questionBankId;
 
     /**
-     * 标题
+     * 题目id
      */
-    private String title;
-
-    /**
-     * 内容
-     */
-    private String content;
-
-    /**
-     * 标签列表
-     */
-    private List<String> tags;
+    private Long questionId;
 
     /**
      * 创建用户 id

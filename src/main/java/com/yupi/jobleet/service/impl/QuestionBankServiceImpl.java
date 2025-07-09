@@ -8,7 +8,7 @@ import com.yupi.jobleet.common.ErrorCode;
 import com.yupi.jobleet.constant.CommonConstant;
 import com.yupi.jobleet.exception.ThrowUtils;
 import com.yupi.jobleet.mapper.QuestionBankMapper;
-import com.yupi.jobleet.model.dto.questionBank.QuestionBankQueryRequest;
+import com.yupi.jobleet.model.dto.questionbank.QuestionBankQueryRequest;
 import com.yupi.jobleet.model.entity.QuestionBank;
 import com.yupi.jobleet.model.entity.User;
 import com.yupi.jobleet.model.vo.QuestionBankVO;
@@ -83,7 +83,6 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
         String searchText = questionBankQueryRequest.getSearchText();
         String sortField = questionBankQueryRequest.getSortField();
         String sortOrder = questionBankQueryRequest.getSortOrder();
-        String picture = questionBankQueryRequest.getPicture();
         Long userid = questionBankQueryRequest.getUserid();
         // todo 补充需要的查询条件
         // 从多字段中搜索

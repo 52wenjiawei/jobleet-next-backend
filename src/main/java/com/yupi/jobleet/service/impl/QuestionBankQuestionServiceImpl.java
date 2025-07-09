@@ -6,20 +6,26 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yupi.jobleet.common.ErrorCode;
 import com.yupi.jobleet.constant.CommonConstant;
+import com.yupi.jobleet.exception.BusinessException;
 import com.yupi.jobleet.exception.ThrowUtils;
 import com.yupi.jobleet.mapper.QuestionBankQuestionMapper;
-import com.yupi.jobleet.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
+import com.yupi.jobleet.model.dto.questionbankquestion.QuestionBankQuestionQueryRequest;
+import com.yupi.jobleet.model.entity.Question;
+import com.yupi.jobleet.model.entity.QuestionBank;
 import com.yupi.jobleet.model.entity.QuestionBankQuestion;
 import com.yupi.jobleet.model.entity.User;
 import com.yupi.jobleet.model.vo.QuestionBankQuestionVO;
 import com.yupi.jobleet.model.vo.UserVO;
 import com.yupi.jobleet.service.QuestionBankQuestionService;
+import com.yupi.jobleet.service.QuestionBankService;
+import com.yupi.jobleet.service.QuestionService;
 import com.yupi.jobleet.service.UserService;
 import com.yupi.jobleet.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +48,14 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
     @Resource
     private UserService userService;
 
+    @Resource
+    private QuestionBankService questionBankService;
+
+    @Resource
+    @Lazy
+    private QuestionService questionService;
+
+
     /**
      * 校验数据
      *
@@ -52,16 +66,18 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
     public void validQuestionBankQuestion(QuestionBankQuestion questionBankQuestion, boolean add) {
         ThrowUtils.throwIf(questionBankQuestion == null, ErrorCode.PARAMS_ERROR);
         // todo 从对象中取值
-        Long questionbankid = questionBankQuestion.getQuestionbankid();
-        // 创建数据时，参数不能为空
-        if (add) {
-            // todo 补充校验规则
-            ThrowUtils.throwIf(questionbankid != null, ErrorCode.PARAMS_ERROR);
-        }
+        Long questionBankId = questionBankQuestion.getQuestionBankId();
+        Long questionId = questionBankQuestion.getQuestionId();
         // 修改数据时，有参数则校验
         // todo 补充校验规则
-        if (questionbankid != null) {
-            ThrowUtils.throwIf(questionbankid <= 0, ErrorCode.PARAMS_ERROR, "题库不存在");
+        if(questionId != null){
+            Question question = questionService.getById(questionId);
+            ThrowUtils.throwIf(question == null, ErrorCode.NOT_FOUND_ERROR, "题目不存在");
+        }
+
+        if (questionBankId != null) {
+            QuestionBank questionBank = questionBankService.getById(questionBankId);
+            ThrowUtils.throwIf(questionBank == null, ErrorCode.NOT_FOUND_ERROR, "题库不存在");
         }
     }
 
@@ -79,33 +95,15 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
         }
         // todo 从对象中取值
         Long id = questionBankQuestionQueryRequest.getId();
-        Long notId = questionBankQuestionQueryRequest.getNotId();
-        String title = questionBankQuestionQueryRequest.getTitle();
-        String content = questionBankQuestionQueryRequest.getContent();
-        String searchText = questionBankQuestionQueryRequest.getSearchText();
+        Long questionId = questionBankQuestionQueryRequest.getQuestionId();
+        Long questionBankId = questionBankQuestionQueryRequest.getQuestionBankId();
         String sortField = questionBankQuestionQueryRequest.getSortField();
         String sortOrder = questionBankQuestionQueryRequest.getSortOrder();
-        List<String> tagList = questionBankQuestionQueryRequest.getTags();
         Long userid = questionBankQuestionQueryRequest.getUserid();
-        // todo 补充需要的查询条件
-        // 从多字段中搜索
-        if (StringUtils.isNotBlank(searchText)) {
-            // 需要拼接查询条件
-            queryWrapper.and(qw -> qw.like("title", searchText).or().like("content", searchText));
-        }
-        // 模糊查询
-        queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
-        queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
-        // JSON 数组查询
-        if (CollUtil.isNotEmpty(tagList)) {
-            for (String tag : tagList) {
-                queryWrapper.like("tags", "\"" + tag + "\"");
-            }
-        }
         // 精确查询
-        queryWrapper.ne(ObjectUtils.isNotEmpty(notId), "id", notId);
         queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
-        queryWrapper.eq(ObjectUtils.isNotEmpty(userid), "userid", userid);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(questionId), "questionId", questionId);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(questionBankId), "questionBankId", questionBankId);
         // 排序规则
         queryWrapper.orderBy(SqlUtils.validSortField(sortField),
                 sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
@@ -163,6 +161,36 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
                 .collect(Collectors.groupingBy(User::getId));
         questionBankQuestionVOPage.setRecords(questionBankQuestionVOList);
         return questionBankQuestionVOPage;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchAddQuestionsToBank(List<Long> questionIdList, Long questionBankId, User loginUser) {
+        // 参数校验
+        ThrowUtils.throwIf(CollUtil.isEmpty(questionIdList), ErrorCode.PARAMS_ERROR, "题目列表为空");
+        ThrowUtils.throwIf(questionBankId == null || questionBankId <= 0, ErrorCode.PARAMS_ERROR, "题库非法");
+        ThrowUtils.throwIf(loginUser == null, ErrorCode.NOT_LOGIN_ERROR);
+        // 检查题目 id 是否存在
+        List<Question> questionList = questionService.listByIds(questionIdList);
+        // 合法的题目 id
+        List<Long> validQuestionIdList = questionList.stream()
+                .map(Question::getId)
+                .collect(Collectors.toList());
+        ThrowUtils.throwIf(CollUtil.isEmpty(validQuestionIdList), ErrorCode.PARAMS_ERROR, "合法的题目列表为空");
+        // 检查题库 id 是否存在
+        QuestionBank questionBank = questionBankService.getById(questionBankId);
+        ThrowUtils.throwIf(questionBank == null, ErrorCode.NOT_FOUND_ERROR, "题库不存在");
+        // 执行插入
+        for (Long questionId : validQuestionIdList) {
+            QuestionBankQuestion questionBankQuestion = new QuestionBankQuestion();
+            questionBankQuestion.setQuestionBankId(questionBankId);
+            questionBankQuestion.setQuestionId(questionId);
+            questionBankQuestion.setUserid(loginUser.getId());
+            boolean result = this.save(questionBankQuestion);
+            if (!result) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "向题库添加题目失败");
+            }
+        }
     }
 
 }

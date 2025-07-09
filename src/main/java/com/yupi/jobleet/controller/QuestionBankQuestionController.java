@@ -9,10 +9,9 @@ import com.yupi.jobleet.common.ResultUtils;
 import com.yupi.jobleet.constant.UserConstant;
 import com.yupi.jobleet.exception.BusinessException;
 import com.yupi.jobleet.exception.ThrowUtils;
-import com.yupi.jobleet.model.dto.questionBankQuestion.QuestionBankQuestionAddRequest;
-import com.yupi.jobleet.model.dto.questionBankQuestion.QuestionBankQuestionEditRequest;
-import com.yupi.jobleet.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
-import com.yupi.jobleet.model.dto.questionBankQuestion.QuestionBankQuestionUpdateRequest;
+import com.yupi.jobleet.model.dto.questionbankquestion.QuestionBankQuestionAddRequest;
+import com.yupi.jobleet.model.dto.questionbankquestion.QuestionBankQuestionQueryRequest;
+import com.yupi.jobleet.model.dto.questionbankquestion.QuestionBankQuestionUpdateRequest;
 import com.yupi.jobleet.model.entity.QuestionBankQuestion;
 import com.yupi.jobleet.model.entity.User;
 import com.yupi.jobleet.model.vo.QuestionBankQuestionVO;
@@ -21,7 +20,6 @@ import com.yupi.jobleet.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
@@ -52,6 +50,7 @@ public class QuestionBankQuestionController {
      * @return
      */
     @PostMapping("/add")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addQuestionBankQuestion(@RequestBody QuestionBankQuestionAddRequest questionBankQuestionAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(questionBankQuestionAddRequest == null, ErrorCode.PARAMS_ERROR);
         // todo 在此处将实体类和 DTO 进行转换
@@ -78,6 +77,7 @@ public class QuestionBankQuestionController {
      * @return
      */
     @PostMapping("/delete")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteQuestionBankQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -203,35 +203,4 @@ public class QuestionBankQuestionController {
         return ResultUtils.success(questionBankQuestionService.getQuestionBankQuestionVOPage(questionBankQuestionPage, request));
     }
 
-    /**
-     * 编辑题库题目关系（给用户使用）
-     *
-     * @param questionBankQuestionEditRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/edit")
-    public BaseResponse<Boolean> editQuestionBankQuestion(@RequestBody QuestionBankQuestionEditRequest questionBankQuestionEditRequest, HttpServletRequest request) {
-        if (questionBankQuestionEditRequest == null || questionBankQuestionEditRequest.getId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        // todo 在此处将实体类和 DTO 进行转换
-        QuestionBankQuestion questionBankQuestion = new QuestionBankQuestion();
-        BeanUtils.copyProperties(questionBankQuestionEditRequest, questionBankQuestion);
-        // 数据校验
-        questionBankQuestionService.validQuestionBankQuestion(questionBankQuestion, false);
-        User loginUser = userService.getLoginUser(request);
-        // 判断是否存在
-        long id = questionBankQuestionEditRequest.getId();
-        QuestionBankQuestion oldQuestionBankQuestion = questionBankQuestionService.getById(id);
-        ThrowUtils.throwIf(oldQuestionBankQuestion == null, ErrorCode.NOT_FOUND_ERROR);
-        // 仅本人或管理员可编辑
-        if (!oldQuestionBankQuestion.getUserid().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        // 操作数据库
-        boolean result = questionBankQuestionService.updateById(questionBankQuestion);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
-        return ResultUtils.success(true);
-    }
 }

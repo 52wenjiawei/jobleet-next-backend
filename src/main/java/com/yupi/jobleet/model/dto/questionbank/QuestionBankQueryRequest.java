@@ -1,4 +1,4 @@
-package com.yupi.jobleet.model.dto.questionBank;
+package com.yupi.jobleet.model.dto.questionbank;
 
 import com.yupi.jobleet.common.PageRequest;
 import lombok.Data;
@@ -43,9 +43,9 @@ public class QuestionBankQueryRequest extends PageRequest implements Serializabl
     private String description;
 
     /**
-     * 图片
+     * 是否要关联查询题目列表
      */
-    private String picture;
+    private boolean needQueryQuestionList;
 
     /**
      * 创建用户 id

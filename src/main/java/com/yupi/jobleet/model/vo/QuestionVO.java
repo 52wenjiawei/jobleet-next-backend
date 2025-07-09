@@ -49,6 +49,11 @@ public class QuestionVO implements Serializable {
     private Date updateTime;
 
     /**
+     * 推荐答案
+     */
+    private String answer;
+
+    /**
      * 标签列表
      */
     private List<String> tagList;
